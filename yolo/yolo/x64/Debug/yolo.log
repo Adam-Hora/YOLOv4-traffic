@@ -1,0 +1,15 @@
+﻿  yolo.cpp
+C:\Users\Adam\source\repos\yolo\yolo\yolo.cpp(88,126): warning C4244: 'argument': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Adam\source\repos\yolo\yolo\yolo.cpp(88,91): warning C4244: 'argument': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Adam\source\repos\yolo\yolo\yolo.cpp(103,65): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Adam\source\repos\yolo\yolo\yolo.cpp(107,41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Adam\source\repos\yolo\yolo\yolo.cpp(160,40): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+LINK : fatal error LNK1104: cannot open file 'opencv_world454d.lib'
