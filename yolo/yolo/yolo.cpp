@@ -510,7 +510,7 @@ int main(int argc, char** argv)
 
     cout << "Total frames: " << total_frames << "\n";
     cout << "Total average number of vehicles  : " << setprecision(2) << caravgall << "\n";
-    cout << "Total number of cars: " << carCount << "\n";
+    cout << "Total number of vehicles : " << carCount << "\n";
 
     return 0;
 }
