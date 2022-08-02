@@ -1,0 +1,5 @@
+video test.mp4
+precission 0.51
+cuda 1
+confidence 0.55
+nms 0.4

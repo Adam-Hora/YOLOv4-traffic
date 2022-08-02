@@ -83,8 +83,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\opencvold\build\install\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opencvold\build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\opencvold\build\install\include;C:\yolov42\darknet\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opencvold\build\install\x64\vc16\lib;C:\yolov42\darknet\build\darknet\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,11 +141,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_world454.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world454.lib;yolo_cpp_dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Tracking.cpp" />
     <ClCompile Include="yolo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tracking.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
