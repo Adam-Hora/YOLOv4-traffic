@@ -23,9 +23,7 @@ const Scalar SCALAR_RED = Scalar(0, 0, 255);
 //prcission of box matching lower number is more precise, but will misclassify if boxes belong to eachother at higher speed of vhecicles
 float precission;
 
-int trajectoryCount[INT16_MAX];
 int trackingCount = 0;
-int carCount = 0;
 vector<Point> pointList[INT16_MAX];
 int classeslist[INT16_MAX];
 
@@ -94,7 +92,6 @@ void LoadBoxes(vector<BoundingBox>& boundingBoxes, vector<Rect>& boxes, int clas
 {
     vector<BoundingBox> currentBoxes;
     bool first = false;
-    bool noVehicle = true;
     if (boundingBoxes.empty())
     {
         first = true;
@@ -104,11 +101,9 @@ void LoadBoxes(vector<BoundingBox>& boundingBoxes, vector<Rect>& boxes, int clas
     {
         if (classIDs[i] == 11 || classIDs[i] == 12 || classIDs[i] == 13 || classIDs[i] == 15 || classIDs[i] == 16)
         {
-            noVehicle = false;
             if (first == true)
             {
                 trackingCount++;
-                carCount++;
                 BoundingBox newBox(boxes[i], trackingCount);
                 boundingBoxes.push_back(newBox);
                 pointList[newBox.trackID].push_back(newBox.centerPositions[i]);
@@ -124,10 +119,6 @@ void LoadBoxes(vector<BoundingBox>& boundingBoxes, vector<Rect>& boxes, int clas
     {
         MatchBoundingBoxes(boundingBoxes, currentBoxes);
         currentBoxes.clear();
-    }
-    if (noVehicle == true)
-    {
-        trackingCount = 0;
     }
 }
 
@@ -214,7 +205,6 @@ void MatchBoxes(vector<BoundingBox>& BoundingBoxes, BoundingBox& currentBox, int
 void AddNewBox(vector<BoundingBox>& boundingboxes, BoundingBox& currentBox)
 {
     trackingCount++;
-    carCount++;
     BoundingBox newBox(currentBox.box,trackingCount);
     newBox.matchFound = true;
     boundingboxes.push_back(newBox);
@@ -222,9 +212,9 @@ void AddNewBox(vector<BoundingBox>& boundingboxes, BoundingBox& currentBox)
 }
 
 //Draw trajectory of vehicle bounding boxes on screen
-void DrawTrajectory(Mat& frame, vector<BoundingBox>& boundingboxes)
+void DrawTrajectory(Mat& frame)
 {
-    for (int i = 0; i <= boundingboxes.size(); i++)
+    for (int i = 0; i <= trackingCount; i++)
     {
         while (pointList[i].size() > 15)
         {
@@ -254,14 +244,14 @@ void DrawCarCount(Mat& frame)
     double fontScale = (frame.rows * frame.cols) / 500000.0;
     int fontThickness = round(fontScale * 1.5);
 
-    Size textSize = getTextSize(to_string(carCount), FONT_HERSHEY_DUPLEX, fontScale, fontThickness, 0);
+    Size textSize = getTextSize(to_string(trackingCount), FONT_HERSHEY_DUPLEX, fontScale, fontThickness, 0);
 
     Point bottomLeft;
 
     bottomLeft.x = frame.cols - 1 - textSize.width * 1.25;
     bottomLeft.y = textSize.height * 1.25;
 
-    putText(frame, to_string(carCount), bottomLeft, FONT_HERSHEY_DUPLEX, fontScale, SCALAR_GREEN, fontThickness);
+    putText(frame, to_string(trackingCount), bottomLeft, FONT_HERSHEY_DUPLEX, fontScale, SCALAR_GREEN, fontThickness);
 }
 
 int main(int argc, char** argv)
@@ -460,7 +450,7 @@ int main(int argc, char** argv)
         //Calling functions to draw trajectory and car count
         LoadBoxes(boundingboxes, boxes, classeslist, detections);
 
-        DrawTrajectory(frame, boundingboxes);
+        DrawTrajectory(frame);
 
         DrawCarCount(frame);
 
@@ -510,7 +500,7 @@ int main(int argc, char** argv)
 
     cout << "Total frames: " << total_frames << "\n";
     cout << "Total average number of vehicles  : " << setprecision(2) << caravgall << "\n";
-    cout << "Total number of vehicles : " << carCount << "\n";
+    cout << "Total number of vehicles : " << trackingCount << "\n";
 
     return 0;
 }
