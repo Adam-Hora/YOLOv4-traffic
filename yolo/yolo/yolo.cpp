@@ -83,9 +83,6 @@ const vector<Scalar> colors =
 };
 
 void MatchBoundingBoxes(vector<BoundingBox>& boundingBoxes, vector<BoundingBox>& currentBoxes);
-double distanceBetweenCenters(Point point1, Point point2);
-void MatchBoxes(vector<BoundingBox>& boundingBoxes, BoundingBox& currentBoundingBox, int& Index);
-void AddNewBox(vector<BoundingBox>& boundingboxes, BoundingBox& currentBox);
 
 //Load bounding box coordinates of vehicles into the BoundingBox class
 void LoadBoxes(vector<BoundingBox>& boundingBoxes, vector<Rect>& boxes, int classIDs[INT16_MAX], int detections)
@@ -122,13 +119,20 @@ void LoadBoxes(vector<BoundingBox>& boundingBoxes, vector<Rect>& boxes, int clas
     }
 }
 
+// Calculate distance between bounding boxes from previous frame with the bounding box from current frame
+double distanceBetweenCenters(Point point1, Point point2)
+{
+    int x = abs(point1.x - point2.x);
+    int y = abs(point1.y - point2.y);
+    return (sqrt(pow(x, 2) + pow(y, 2)));
+}
+
 //Compares the distance between bounding boxes from previous frame with the bounding box from current frame and decides if the bounding boxes are the same object or new one
 void MatchBoundingBoxes(vector<BoundingBox>& boundingBoxes, vector<BoundingBox>& currentBoxes) 
 {
     for (auto& boundingbox : boundingBoxes) 
     {
         boundingbox.matchFound = false;
-
         boundingbox.predictNextPosition();
     }
 
@@ -144,19 +148,33 @@ void MatchBoundingBoxes(vector<BoundingBox>& boundingBoxes, vector<BoundingBox>&
                 double Distance = distanceBetweenCenters(currentBox.centerPositions.back(), boundingBoxes[i].predictedNextPosition);
                 if (Distance < ShortestDistance) 
                 {
-                    ShortestDistance = Distance;
                     Index = i;
+                    ShortestDistance = Distance;
                 }
             }
         }
 
         if ((ShortestDistance >= 0) && (ShortestDistance < currentBox.diagonalLenght * precission)) 
+        // Match bounding box from previous frame to the bounding box from current frame
         {
-            MatchBoxes(boundingBoxes, currentBox, Index);
+            boundingBoxes[Index].box = currentBox.box;
+            boundingBoxes[Index].centerPositions.push_back(currentBox.centerPositions.back());
+            boundingBoxes[Index].diagonalLenght = currentBox.diagonalLenght;
+
+            pointList[boundingBoxes[Index].trackID].push_back(currentBox.centerPositions.back());
+
+            boundingBoxes[Index].matchFound = true;
+            boundingBoxes[Index].tracked = true;
+            boundingBoxes[Index].NoMatch = 0;
         }
         else 
+        // Create new bounding box with new tracking Id and memorize the center positions of that bounding box under the new trackingId
         {
-            AddNewBox(boundingBoxes, currentBox);
+            trackingCount++;
+            BoundingBox newBox(currentBox.box, trackingCount);
+            newBox.matchFound = true;
+            boundingBoxes.push_back(newBox);
+            pointList[trackingCount].push_back(newBox.centerPositions.back());
         }
 
     }
@@ -177,38 +195,6 @@ void MatchBoundingBoxes(vector<BoundingBox>& boundingBoxes, vector<BoundingBox>&
             pointList[boundingbox.trackID].clear();
         }
     }
-}
-
-// Calculate distance between bounding boxes from previous frame with the bounding box from current frame
-double distanceBetweenCenters(Point point1, Point point2) 
-{
-    int x = abs(point1.x - point2.x);
-    int y = abs(point1.y - point2.y);
-    return (sqrt(pow(x, 2) + pow(y, 2)));
-}
-
-// Match bounding box from previous frame to the bounding box from current frame
-void MatchBoxes(vector<BoundingBox>& BoundingBoxes, BoundingBox& currentBox, int& Index) 
-{
-    BoundingBoxes[Index].box = currentBox.box;
-    BoundingBoxes[Index].centerPositions.push_back(currentBox.centerPositions.back());
-    BoundingBoxes[Index].diagonalLenght = currentBox.diagonalLenght;
-
-    pointList[BoundingBoxes[Index].trackID].push_back(currentBox.centerPositions.back());
-
-    BoundingBoxes[Index].matchFound = true;
-    BoundingBoxes[Index].tracked = true;
-    BoundingBoxes[Index].NoMatch = 0;
-}
-
-// Create new bounding box with new tracking Id and memorize the center positions of that bounding box under the new trackingId
-void AddNewBox(vector<BoundingBox>& boundingboxes, BoundingBox& currentBox)
-{
-    trackingCount++;
-    BoundingBox newBox(currentBox.box,trackingCount);
-    newBox.matchFound = true;
-    boundingboxes.push_back(newBox);
-    pointList[trackingCount].push_back(newBox.centerPositions.back());
 }
 
 //Draw trajectory of vehicle bounding boxes on screen
